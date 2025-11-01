@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>幸運輪盤 | 豪華版</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wheel-size: min(450px, 85vw);
+    --spin-duration: 4.5s;
+    --spin-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --shadow-primary: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    --shadow-secondary: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 60px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Poppins', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    background:
+      radial-gradient(circle at 18% 82%, rgba(104, 120, 255, 0.35) 0%, transparent 55%),
+      radial-gradient(circle at 82% 18%, rgba(255, 119, 198, 0.28) 0%, transparent 50%),
+      radial-gradient(circle at 45% 35%, rgba(120, 219, 255, 0.25) 0%, transparent 55%),
+      linear-gradient(135deg, #0f172a 0%, #1e3a8a 48%, #4338ca 100%);
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    width: 70vw;
+    height: 70vw;
+    right: -18vw;
+    top: -22vw;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 65%);
+    filter: blur(120px);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 42px;
+    padding: 48px 32px;
+    position: relative;
+    z-index: 2;
+    backdrop-filter: blur(24px);
+    border-radius: 32px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.06) 60%, rgba(255, 255, 255, 0.18) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 35px 70px -20px rgba(15, 23, 42, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    max-width: 640px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .container::before,
+  .container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .container::before {
+    background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    opacity: 0.8;
+  }
+
+  .container::after {
+    background: radial-gradient(circle at 80% 100%, rgba(79, 172, 254, 0.4) 0%, transparent 60%);
+    mix-blend-mode: screen;
+    opacity: 0.65;
+  }
+
+  .title {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .title h1 {
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 900;
+    background: var(--success-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 30px rgba(79, 172, 254, 0.5);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .title p {
+    margin: 15px 0 0 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .wheel-wrap {
+    position: relative;
+    width: var(--wheel-size);
+    height: var(--wheel-size);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(1deg); }
+  }
+
+  .pointer {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 22px solid transparent;
+    border-right: 22px solid transparent;
+    border-top: 50px solid #ff6b6b;
+    z-index: 25;
+    filter: drop-shadow(0 8px 16px rgba(255, 107, 107, 0.4));
+    animation: pointerGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes pointerGlow {
+    0%, 100% { filter: drop-shadow(0 8px 16px rgba(255, 107, 107, 0.4)); }
+    50% { filter: drop-shadow(0 8px 25px rgba(255, 107, 107, 0.8)); }
+  }
+
+  /* 轉盤本體 */
+  .wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 8px solid rgba(255, 255, 255, 0.95);
+    overflow: visible;
+    --rotation-angle: 0deg;
+    transform: rotate(var(--rotation-angle));
+    transition: transform var(--spin-duration) var(--spin-timing-function);
+    box-shadow: 
+      var(--shadow-primary),
+      inset 0 0 20px rgba(0, 0, 0, 0.1),
+      0 0 0 12px rgba(255, 255, 255, 0.1),
+      0 0 0 24px rgba(255, 255, 255, 0.05);
+    background: white;
+    position: relative;
+    will-change: transform;
+  }
+
+  .wheel::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 70%);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .wheel::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: inset 0 0 25px rgba(15, 23, 42, 0.18);
+    pointer-events: none;
+  }
+
+  .wheel.spinning {
+    box-shadow: 
+      0 30px 80px -12px rgba(0, 0, 0, 0.6),
+      0 0 100px rgba(102, 126, 234, 0.4),
+      inset 0 0 30px rgba(0, 0, 0, 0.2),
+      0 0 0 12px rgba(255, 255, 255, 0.2),
+      0 0 0 24px rgba(255, 255, 255, 0.1);
+    transform-style: preserve-3d;
+  }
+
+  /* 中心圓 */
+  .center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: 
+      radial-gradient(circle at 30% 30%, #ffffff, #e8e8e8),
+      var(--primary-gradient);
+    border: 6px solid rgba(255, 255, 255, 0.95);
+    z-index: 20;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 2px 8px rgba(255, 255, 255, 0.3);
+  }
+
+  .center::after {
+    content: '🎯';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    animation: centerSpin 8s linear infinite;
+  }
+
+  @keyframes centerSpin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* 標籤（數字）樣式 */
+  .label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: center;
+    pointer-events: none;
+    z-index: 22;
+  }
+
+  .label .bubble {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 6px;
+    background: transparent;
+    color: #ffffff;
+    font-weight: 800;
+    border: none;
+    text-align: center;
+    font-size: 1.1rem;
+    white-space: nowrap;
+    letter-spacing: 0.4px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    transition: transform 0.3s ease;
+    transform-origin: center;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 15px;
+  }
+
+  #spin-btn {
+    padding: 18px 45px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 1.2rem;
+    background: var(--secondary-gradient);
+    color: #fff;
+    box-shadow: 
+      0 15px 35px rgba(245, 87, 108, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    min-width: 200px;
+  }
+
+  #spin-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+  }
+
+  #spin-btn::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 46px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  #spin-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 20px 45px rgba(245, 87, 108, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  #spin-btn:hover::before {
+    left: 100%;
+  }
+
+  #spin-btn:active {
+    transform: translateY(-1px);
+  }
+
+  #spin-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+    box-shadow: 0 8px 20px rgba(149, 165, 166, 0.3);
+  }
+
+  #spin-btn:disabled::before {
+    display: none;
+  }
+
+  #result {
+    margin-top: 10px;
+    font-weight: 900;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    background: var(--success-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0;
+    transform: translateY(15px) scale(0.9);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    text-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+    letter-spacing: 1px;
+    position: relative;
+  }
+
+  #result::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.6), transparent);
+    opacity: 0;
+    transition: opacity 0.5s ease 0.2s;
+  }
+
+  #result.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  #result.show::after {
+    opacity: 1;
+  }
+
+  /* 響應式設計 */
+  @media (max-width: 768px) {
+    :root {
+      --wheel-size: min(350px, 90vw);
+    }
+
+    body {
+      padding: 40px 16px;
+    }
+    
+    .container {
+      gap: 32px;
+      padding: 36px 24px;
+      border-radius: 28px;
+    }
+    
+    .title h1 {
+      font-size: 2.5rem;
+    }
+    
+    .title p {
+      font-size: 1rem;
+    }
+    
+    #spin-btn {
+      padding: 15px 35px;
+      font-size: 1.1rem;
+      min-width: 180px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    :root {
+      --wheel-size: min(300px, 88vw);
+    }
+
+    body {
+      padding: 32px 12px;
+    }
+    
+    .container {
+      gap: 26px;
+      padding: 28px 14px;
+      border-radius: 22px;
+    }
+    
+    .title h1 {
+      font-size: 2rem;
+    }
+    
+    .title p {
+      font-size: 0.9rem;
+    }
+    
+    .label .bubble {
+      font-size: 0.8rem;
+      padding: 3px 4px;
+    }
+    
+    #spin-btn {
+      padding: 12px 30px;
+      font-size: 1rem;
+      min-width: 160px;
+    }
+    
+    .center {
+      width: 50px;
+      height: 50px;
+      border-width: 4px;
+    }
+    
+    .center::after {
+      font-size: 1.2rem;
+    }
+  }
+
+  /* 特殊效果 */
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #fff, #4facfe);
+    border-radius: 50%;
+    animation: sparkle 2s infinite;
+    pointer-events: none;
+  }
+
+  /* 勝利動畫 */
+  @keyframes victory {
+    0% { transform: rotate(var(--rotation-angle)) scale(1); }
+    25% { transform: rotate(var(--rotation-angle)) scale(1.05); }
+    50% { transform: rotate(var(--rotation-angle)) scale(1); }
+    75% { transform: rotate(var(--rotation-angle)) scale(1.02); }
+    100% { transform: rotate(var(--rotation-angle)) scale(1); }
+  }
+
+  .victory-animation {
+    animation: victory 0.6s ease-out;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="title"><h1>幸運輪盤</h1><p>轉動輪盤，看看你的幸運數字！</p></div>
+
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <div class="wheel" id="wheel"></div>
+      <div class="center"></div>
+    </div>
+
+    <div class="controls">
+      <button id="spin-btn">🎲 旋轉</button>
+      <div id="result"></div>
+    </div>
+  </div>
+
+<script>
+  const wheel = document.getElementById('wheel');
+  const spinBtn = document.getElementById('spin-btn');
+  const result = document.getElementById('result');
+
+  const segments = [
+    { label: '10', color: '#FF6B6B', probability: 20 },    // 20%
+    { label: '20', color: '#4ECDC4', probability: 18 },    // 18%
+    { label: '30', color: '#45B7D1', probability: 16 },    // 16%
+    { label: '40', color: '#96CEB4', probability: 14 },    // 14%
+    { label: '50', color: '#FFEAA7', probability: 12 },    // 12%
+    { label: '60', color: '#DDA0DD', probability: 8 },     // 8%
+    { label: '70', color: '#98D8C8', probability: 7 },     // 7%
+    { label: '80', color: '#F7DC6F', probability: 5 },     // 5%
+  ];
+
+  // 計算累積角度
+  const totalProbability = segments.reduce((sum, seg) => sum + seg.probability, 0);
+  let cumulativeAngle = 0;
+  segments.forEach(segment => {
+    segment.startAngle = cumulativeAngle;
+    segment.angleSize = (segment.probability / totalProbability) * 360;
+    segment.endAngle = cumulativeAngle + segment.angleSize;
+    cumulativeAngle += segment.angleSize;
+  });
+
+  let currentRotation = 0;
+  let isSpinning = false;
+
+  function buildWheel() {
+    // 1) 用 conic-gradient 畫扇形（按機率大小）
+    const gradParts = segments.map((s) => {
+      return `${s.color} ${s.startAngle}deg ${s.endAngle}deg`;
+    });
+    wheel.style.background = `conic-gradient(${gradParts.join(', ')})`;
+
+    // 2) 移除舊標籤（如果有）
+    document.querySelectorAll('.label').forEach(n => n.remove());
+
+    // 3) 產生標籤，計算 radius 並放在扇形中央
+    const rect = wheel.getBoundingClientRect();
+    const radius = Math.min(rect.width, rect.height) / 2;
+    
+    segments.forEach((segment) => {
+      const angle = segment.startAngle + segment.angleSize / 2;
+      const angleRad = (angle - 90) * (Math.PI / 180);
+
+      let offsetFromEdge;
+      if (segment.angleSize > 60) {
+        offsetFromEdge = 60;
+      } else if (segment.angleSize > 30) {
+        offsetFromEdge = 52;
+      } else if (segment.angleSize > 15) {
+        offsetFromEdge = 46;
+      } else {
+        offsetFromEdge = 42;
+      }
+
+      const distance = radius - offsetFromEdge;
+      const x = Math.cos(angleRad) * distance;
+      const y = Math.sin(angleRad) * distance;
+
+      const lbl = document.createElement('div');
+      lbl.className = 'label';
+      lbl.style.left = `calc(50% + ${x}px)`;
+      lbl.style.top = `calc(50% + ${y}px)`;
+      lbl.style.transform = 'translate(-50%, -50%)';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = segment.label;
+      bubble.style.transform = `rotate(${angle}deg)`;
+
+      if (segment.angleSize < 15) {
+        bubble.style.fontSize = '0.78rem';
+        bubble.style.padding = '2px 4px';
+      } else if (segment.angleSize < 30) {
+        bubble.style.fontSize = '0.9rem';
+        bubble.style.padding = '3px 5px';
+      } else if (segment.angleSize < 60) {
+        bubble.style.fontSize = '1rem';
+        bubble.style.padding = '4px 6px';
+      } else {
+        bubble.style.fontSize = '1.1rem';
+        bubble.style.padding = '5px 7px';
+      }
+
+      lbl.appendChild(bubble);
+      wheel.appendChild(lbl);
+    });
+
+    // 在控制台顯示扇形資訊
+    console.log('扇形資訊:');
+    segments.forEach((s, i) => {
+      console.log(`${s.label}: ${s.probability}% (${s.startAngle.toFixed(1)}° - ${s.endAngle.toFixed(1)}°, 大小: ${s.angleSize.toFixed(1)}°)`);
+    });
+  }
+
+  window.addEventListener('load', () => {
+    wheel.style.setProperty('--rotation-angle', '0deg');
+    buildWheel();
+    result.innerHTML = '🍀 準備好測試你的運氣了嗎？';
+    result.classList.add('show');
+    
+    // 添加一些裝飾性閃爍效果
+    createSparkles();
+  });
+
+  // 創建裝飾性閃爍效果
+  function createSparkles() {
+    const container = document.querySelector('.container');
+    for (let i = 0; i < 8; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.left = Math.random() * 100 + '%';
+      sparkle.style.top = Math.random() * 100 + '%';
+      sparkle.style.animationDelay = Math.random() * 2 + 's';
+      container.appendChild(sparkle);
+    }
+  }
+
+  // 重新建立以應對 resize
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(buildWheel, 120); });
+
+  spinBtn.addEventListener('click', () => {
+    if (isSpinning) return;
+    isSpinning = true;
+    spinBtn.disabled = true;
+    spinBtn.textContent = '🌀 旋轉中...';
+    result.classList.remove('show');
+    result.textContent = '';
+
+    const rndSpins = Math.floor(Math.random() * 3) + 5; // 5~7 圈
+    const rndAngle = Math.floor(Math.random() * 360);
+    const total = rndSpins * 360 + rndAngle;
+    currentRotation += total;
+    wheel.classList.add('spinning');
+    wheel.style.setProperty('--rotation-angle', `${currentRotation}deg`);
+
+    wheel.addEventListener('transitionend', () => {
+      isSpinning = false;
+      spinBtn.disabled = false;
+      spinBtn.textContent = '🎲 旋轉';
+      wheel.classList.remove('spinning');
+
+      const final = currentRotation % 360;
+      // 修正計算邏輯：找出指針指向的扇形
+      const adjustedAngle = (360 - final) % 360;
+      
+      let winner = segments[0]; // 預設
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        if (adjustedAngle >= seg.startAngle && adjustedAngle < seg.endAngle) {
+          winner = seg;
+          break;
+        }
+      }
+
+      console.log('最終角度:', final);
+      console.log('調整後角度:', adjustedAngle);
+      console.log('獲勝扇形:', winner);
+
+      setTimeout(() => {
+        result.innerHTML = `
+          <div style="font-size: 1.1rem; margin-bottom: 8px; color: rgba(79, 172, 254, 0.9);">🎉 恭喜你獲得 🎉</div>
+          <div style="font-size: 2.5rem; margin: 8px 0; text-shadow: 0 0 30px rgba(79, 172, 254, 0.8);">${winner.label}</div>
+          <div style="font-size: 0.9rem; color: rgba(79, 172, 254, 0.7); font-weight: 600;">你的幸運數字!</div>
+        `;
+        result.classList.add('show');
+        
+        // 添加勝利動畫效果
+        wheel.classList.add('victory-animation');
+        setTimeout(() => {
+          wheel.classList.remove('victory-animation');
+        }, 600);
+      }, 300);
+    }, { once:true });
+  });
+</script>
+</body>
+</html>
