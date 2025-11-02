@@ -7,6 +7,9 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
+  /* ============================== */
+  /* 全域 CSS 變數：控制尺寸與色彩配置 */
+  /* ============================== */
   :root {
     --wheel-size: min(450px, 85vw);
     --spin-duration: 4.5s;
@@ -20,8 +23,12 @@
     --shadow-secondary: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
   }
 
+  /* 統一盒模型設定，避免內距造成寬度超出 */
   * { box-sizing: border-box; }
 
+  /* ============================== */
+  /* 主體背景：中心置中與多層光暈背景                 */
+  /* ============================== */
   body {
     min-height: 100vh;
     margin: 0;
@@ -41,6 +48,7 @@
     line-height: 1.6;
   }
 
+  /* 背景漂浮細點紋理（固定覆蓋層） */
   body::before {
     content: '';
     position: fixed;
@@ -50,6 +58,7 @@
     z-index: 0;
   }
 
+  /* 右上角漫射光暈（固定覆蓋層） */
   body::after {
     content: '';
     position: fixed;
@@ -64,6 +73,9 @@
     z-index: 0;
   }
 
+  /* ============================== */
+  /* 主視覺容器：玻璃擬態卡片包覆輪盤與按鈕 */
+  /* ============================== */
   .container {
     display: flex;
     flex-direction: column;
@@ -82,6 +94,7 @@
     overflow: hidden;
   }
 
+  /* 容器裝飾層：左上亮斑與右下色彩光暈 */
   .container::before,
   .container::after {
     content: '';
@@ -92,22 +105,26 @@
     z-index: -1;
   }
 
+  /* 左上角高亮漸層讓卡片更立體 */
   .container::before {
     background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
     opacity: 0.8;
   }
 
+  /* 右下角藍色光暈營造深度 */
   .container::after {
     background: radial-gradient(circle at 80% 100%, rgba(79, 172, 254, 0.4) 0%, transparent 60%);
     mix-blend-mode: screen;
     opacity: 0.65;
   }
 
+  /* 標題區塊：置中主副標 */
   .title {
     text-align: center;
     margin-bottom: 10px;
   }
 
+  /* 主標題漸層文字 */
   .title h1 {
     margin: 0;
     font-size: clamp(2rem, 6vw, 3.5rem);
@@ -121,6 +138,7 @@
     line-height: 1.1;
   }
 
+  /* 標題下方說明文字 */
   .title p {
     margin: 15px 0 0 0;
     color: rgba(255, 255, 255, 0.8);
@@ -129,6 +147,7 @@
     letter-spacing: 0.5px;
   }
 
+  /* 輪盤外框：控制尺寸並套用浮動效果 */
   .wheel-wrap {
     position: relative;
     width: var(--wheel-size);
@@ -136,11 +155,13 @@
     animation: float 6s ease-in-out infinite;
   }
 
+  /* 漂浮動畫：讓輪盤緩慢上下浮動 */
   @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
     50% { transform: translateY(-8px) rotate(1deg); }
   }
 
+  /* 指針造型：紅色三角形與陰影 */
   .pointer {
     position: absolute;
     top: -22px;
@@ -156,12 +177,16 @@
     animation: pointerGlow 3s ease-in-out infinite;
   }
 
+  /* 指針光暈呼吸動畫 */
   @keyframes pointerGlow {
     0%, 100% { filter: drop-shadow(0 8px 16px rgba(255, 107, 107, 0.4)); }
     50% { filter: drop-shadow(0 8px 25px rgba(255, 107, 107, 0.8)); }
   }
 
   /* 轉盤本體 */
+  /* ============================== */
+  /* 轉盤本體：圓形外框、陰影層與旋轉屬性 */
+  /* ============================== */
   .wheel {
     width: 100%;
     height: 100%;
@@ -181,6 +206,7 @@
     will-change: transform;
   }
 
+  /* 內圈亮暈層 */
   .wheel::before {
     content: '';
     position: absolute;
@@ -191,6 +217,7 @@
     pointer-events: none;
   }
 
+  /* 內圈描邊與內陰影 */
   .wheel::after {
     content: '';
     position: absolute;
@@ -201,6 +228,7 @@
     pointer-events: none;
   }
 
+  /* 旋轉期間的強化陰影效果 */
   .wheel.spinning {
     box-shadow: 
       0 30px 80px -12px rgba(0, 0, 0, 0.6),
@@ -212,6 +240,9 @@
   }
 
   /* 中心圓 */
+  /* ============================== */
+  /* 中心圓：立體外觀與內部光影 */
+  /* ============================== */
   .center {
     position: absolute;
     left: 50%;
@@ -230,6 +261,7 @@
       inset 0 2px 8px rgba(255, 255, 255, 0.3);
   }
 
+  /* 標靶符號與旋轉動畫 */
   .center::after {
     content: '🎯';
     position: absolute;
@@ -240,12 +272,16 @@
     animation: centerSpin 8s linear infinite;
   }
 
+  /* 中心標靶慢速旋轉 */
   @keyframes centerSpin {
     from { transform: translate(-50%, -50%) rotate(0deg); }
     to { transform: translate(-50%, -50%) rotate(360deg); }
   }
 
   /* 標籤（數字）樣式 */
+  /* ============================== */
+  /* 標籤定位：控制數字泡泡的定位與層級 */
+  /* ============================== */
   .label {
     position: absolute;
     left: 50%;
@@ -256,6 +292,7 @@
     z-index: 22;
   }
 
+  /* 標籤泡泡：字型、陰影與透明背景 */
   .label .bubble {
     display: inline-flex;
     align-items: center;
@@ -274,6 +311,9 @@
     transform-origin: center;
   }
 
+  /* ============================== */
+  /* 控制區塊：按鈕與結果顯示垂直排列 */
+  /* ============================== */
   .controls {
     display: flex;
     flex-direction: column;
@@ -284,6 +324,7 @@
     margin-top: 15px;
   }
 
+  /* 旋轉按鈕：漸層、陰影與互動效果 */
   #spin-btn {
     padding: 18px 45px;
     border-radius: 50px;
@@ -304,6 +345,7 @@
     min-width: 200px;
   }
 
+  /* 滑過時的掃光效果 */
   #spin-btn::before {
     content: '';
     position: absolute;
@@ -315,6 +357,7 @@
     transition: left 0.6s;
   }
 
+  /* 內側描邊提升質感 */
   #spin-btn::after {
     content: '';
     position: absolute;
@@ -325,6 +368,7 @@
     pointer-events: none;
   }
 
+  /* 滑鼠滑過提升高度 */
   #spin-btn:hover {
     transform: translateY(-3px);
     box-shadow: 
@@ -332,14 +376,17 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
+  /* 掃光滑過動畫 */
   #spin-btn:hover::before {
     left: 100%;
   }
 
+  /* 按下按鈕的微縮放 */
   #spin-btn:active {
     transform: translateY(-1px);
   }
 
+  /* 旋轉期間禁用狀態樣式 */
   #spin-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
@@ -348,10 +395,12 @@
     box-shadow: 0 8px 20px rgba(149, 165, 166, 0.3);
   }
 
+  /* 禁用時移除掃光效果 */
   #spin-btn:disabled::before {
     display: none;
   }
 
+  /* 結果文字：漸層字色與入場動畫初始狀態 */
   #result {
     margin-top: 10px;
     font-weight: 900;
@@ -369,6 +418,7 @@
     position: relative;
   }
 
+  /* 結果底部光線裝飾 */
   #result::after {
     content: '';
     position: absolute;
@@ -382,16 +432,21 @@
     transition: opacity 0.5s ease 0.2s;
   }
 
+  /* 顯示結果時淡入與縮放 */
   #result.show {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 
+  /* 顯示結果時同步啟動底部光線 */
   #result.show::after {
     opacity: 1;
   }
 
   /* 響應式設計 */
+  /* ============================== */
+  /* 響應式調整：中型螢幕以下加強間距與按鈕尺寸 */
+  /* ============================== */
   @media (max-width: 768px) {
     :root {
       --wheel-size: min(350px, 90vw);
@@ -422,6 +477,9 @@
     }
   }
 
+  /* ============================== */
+  /* 響應式調整：手機寬度優化排版與字距 */
+  /* ============================== */
   @media (max-width: 480px) {
     :root {
       --wheel-size: min(300px, 88vw);
@@ -468,11 +526,13 @@
   }
 
   /* 特殊效果 */
+  /* 閃爍光點動畫：縮放與旋轉 */
   @keyframes sparkle {
     0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
     50% { opacity: 1; transform: scale(1) rotate(180deg); }
   }
 
+  /* 光點元素樣式 */
   .sparkle {
     position: absolute;
     width: 6px;
@@ -484,6 +544,7 @@
   }
 
   /* 勝利動畫 */
+  /* 勝利動畫：保持當前角度並做輕微縮放 */
   @keyframes victory {
     0% { transform: rotate(var(--rotation-angle)) scale(1); }
     25% { transform: rotate(var(--rotation-angle)) scale(1.05); }
@@ -492,21 +553,26 @@
     100% { transform: rotate(var(--rotation-angle)) scale(1); }
   }
 
+  /* 套用勝利動畫的控制類別 */
   .victory-animation {
     animation: victory 0.6s ease-out;
   }
 </style>
 </head>
 <body>
+  <!-- 主容器：包覆整個輪盤體驗 -->
   <div class="container">
+    <!-- 標題區塊：提供使用說明 -->
     <div class="title"><h1>幸運輪盤</h1><p>轉動輪盤，看看你的幸運數字！</p></div>
 
+    <!-- 輪盤外框：包含指針、轉盤與中心標靶 -->
     <div class="wheel-wrap">
       <div class="pointer"></div>
       <div class="wheel" id="wheel"></div>
       <div class="center"></div>
     </div>
 
+    <!-- 控制區塊：旋轉按鈕與結果顯示 -->
     <div class="controls">
       <button id="spin-btn">🎲 旋轉</button>
       <div id="result"></div>
@@ -514,10 +580,15 @@
   </div>
 
 <script>
+  // ==============================
+  // 幸運輪盤互動腳本：控制扇形佈局、旋轉動畫與結果顯示
+  // ==============================
+  // DOM 元素參考：輪盤、按鈕與結果顯示
   const wheel = document.getElementById('wheel');
   const spinBtn = document.getElementById('spin-btn');
   const result = document.getElementById('result');
 
+  // 扇形資料：定義數字、顏色與機率百分比
   const segments = [
     { label: '10', color: '#FF6B6B', probability: 20 },    // 20%
     { label: '20', color: '#4ECDC4', probability: 18 },    // 18%
@@ -529,41 +600,49 @@
     { label: '80', color: '#F7DC6F', probability: 5 },     // 5%
   ];
 
-  // 計算累積角度
+  // 計算累積角度：將機率換算成扇形角度範圍
   const totalProbability = segments.reduce((sum, seg) => sum + seg.probability, 0);
   let cumulativeAngle = 0;
   segments.forEach(segment => {
+    // 依序累積角度區間，為每個扇形標記起始與結束角度
     segment.startAngle = cumulativeAngle;
     segment.angleSize = (segment.probability / totalProbability) * 360;
     segment.endAngle = cumulativeAngle + segment.angleSize;
     cumulativeAngle += segment.angleSize;
   });
 
+  // 紀錄目前旋轉累計角度與轉動狀態
   let currentRotation = 0;
   let isSpinning = false;
 
+  // 建構輪盤：依據機率生成背景與對應標籤
   function buildWheel() {
     // 1) 用 conic-gradient 畫扇形（按機率大小）
+    // 組合每一段的色彩與角度範圍
     const gradParts = segments.map((s) => {
       return `${s.color} ${s.startAngle}deg ${s.endAngle}deg`;
     });
     wheel.style.background = `conic-gradient(${gradParts.join(', ')})`;
 
-    // 2) 移除舊標籤（如果有）
+    // 2) 移除舊標籤（避免重複堆疊）
     document.querySelectorAll('.label').forEach(n => n.remove());
 
     // 3) 產生標籤，計算 radius 並放在扇形中央
     const rect = wheel.getBoundingClientRect();
     const radius = Math.min(rect.width, rect.height) / 2;
+    // 取得半徑以便計算標籤位置
     
     segments.forEach((segment) => {
       const angle = segment.startAngle + segment.angleSize / 2;
       const angleRad = (angle - 90) * (Math.PI / 180);
+      // 以扇形中心角計算標籤位移角度
 
-  const radialInset = Math.max(38, Math.min(54, radius * 0.18 + 30));
+      const radialInset = Math.max(38, Math.min(54, radius * 0.18 + 30));
       const distance = radius - radialInset;
+      // 固定距離讓所有標籤等距離外圈
       const x = Math.cos(angleRad) * distance;
       const y = Math.sin(angleRad) * distance;
+      // 將極座標轉換為相對位移
 
       const lbl = document.createElement('div');
       lbl.className = 'label';
@@ -575,17 +654,22 @@
       bubble.className = 'bubble';
       bubble.textContent = segment.label;
       bubble.style.transform = `rotate(${angle}deg)`;
+      // 讓文字朝外側排列
 
       if (segment.angleSize < 15) {
+        // 小角度扇形：縮小字體避免溢出
         bubble.style.fontSize = '0.78rem';
         bubble.style.padding = '2px 4px';
       } else if (segment.angleSize < 30) {
+        // 中小角度：適度縮減大小
         bubble.style.fontSize = '0.9rem';
         bubble.style.padding = '3px 5px';
       } else if (segment.angleSize < 60) {
+        // 中型扇形：使用略大標籤
         bubble.style.fontSize = '1rem';
         bubble.style.padding = '4px 6px';
       } else {
+        // 大扇形：維持預設大小
         bubble.style.fontSize = '1.1rem';
         bubble.style.padding = '5px 7px';
       }
@@ -594,27 +678,29 @@
       wheel.appendChild(lbl);
     });
 
-    // 在控制台顯示扇形資訊
+    // 在控制台顯示扇形資訊方便檢查角度
     console.log('扇形資訊:');
     segments.forEach((s, i) => {
       console.log(`${s.label}: ${s.probability}% (${s.startAngle.toFixed(1)}° - ${s.endAngle.toFixed(1)}°, 大小: ${s.angleSize.toFixed(1)}°)`);
     });
   }
 
+  // 頁面載入完成後初始化輪盤與結果文字
   window.addEventListener('load', () => {
-    wheel.style.setProperty('--rotation-angle', '0deg');
+    wheel.style.setProperty('--rotation-angle', '0deg'); // 確保初始角度設為零
     buildWheel();
     result.innerHTML = '🍀 準備好測試你的運氣了嗎？';
-    result.classList.add('show');
+    result.classList.add('show'); // 初始顯示提示文字
     
     // 添加一些裝飾性閃爍效果
     createSparkles();
   });
 
-  // 創建裝飾性閃爍效果
+  // 創建裝飾性閃爍效果：在容器內隨機散布光點
   function createSparkles() {
     const container = document.querySelector('.container');
     for (let i = 0; i < 8; i++) {
+      // 逐一建立光點並設定隨機位置與延遲
       const sparkle = document.createElement('div');
       sparkle.className = 'sparkle';
       sparkle.style.left = Math.random() * 100 + '%';
@@ -624,37 +710,43 @@
     }
   }
 
-  // 重新建立以應對 resize
+  // 重新建立以應對 resize：節流後重繪標籤維持對齊
   let rt;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(buildWheel, 120); });
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(buildWheel, 120); // 節流 120ms 後重新計算標籤位置
+  });
 
+  // 點擊旋轉按鈕：啟動動畫與決定中獎扇形
   spinBtn.addEventListener('click', () => {
-    if (isSpinning) return;
+    if (isSpinning) return; // 若正在旋轉則忽略連續點擊
     isSpinning = true;
     spinBtn.disabled = true;
     spinBtn.textContent = '🌀 旋轉中...';
     result.classList.remove('show');
-    result.textContent = '';
+    result.textContent = ''; // 在轉動期間清空結果
 
     const rndSpins = Math.floor(Math.random() * 3) + 5; // 5~7 圈
-    const rndAngle = Math.floor(Math.random() * 360);
+    const rndAngle = Math.floor(Math.random() * 360); // 額外的隨機偏移
     const total = rndSpins * 360 + rndAngle;
-    currentRotation += total;
+    currentRotation += total; // 累積旋轉角度以保持進位
     wheel.classList.add('spinning');
     wheel.style.setProperty('--rotation-angle', `${currentRotation}deg`);
 
+    // 旋轉動畫結束後計算落點與更新 UI
     wheel.addEventListener('transitionend', () => {
       isSpinning = false;
       spinBtn.disabled = false;
-      spinBtn.textContent = '🎲 旋轉';
-      wheel.classList.remove('spinning');
+      spinBtn.textContent = '🎲 旋轉'; // 還原按鈕文字
+      wheel.classList.remove('spinning'); // 回復靜止陰影
 
       const final = currentRotation % 360;
       // 修正計算邏輯：找出指針指向的扇形
       const adjustedAngle = (360 - final) % 360;
-      
+
       let winner = segments[0]; // 預設
       for (let i = 0; i < segments.length; i++) {
+        // 判斷調整後角度落在哪個扇形範圍
         const seg = segments[i];
         if (adjustedAngle >= seg.startAngle && adjustedAngle < seg.endAngle) {
           winner = seg;
@@ -662,10 +754,12 @@
         }
       }
 
+      // 調試資訊：輸出最終角度與中獎扇形
       console.log('最終角度:', final);
       console.log('調整後角度:', adjustedAngle);
       console.log('獲勝扇形:', winner);
 
+      // 稍作延遲後顯示結果與勝利動畫
       setTimeout(() => {
         result.innerHTML = `
           <div style="font-size: 1.1rem; margin-bottom: 8px; color: rgba(79, 172, 254, 0.9);">🎉 恭喜你獲得 🎉</div>
@@ -678,7 +772,7 @@
         wheel.classList.add('victory-animation');
         setTimeout(() => {
           wheel.classList.remove('victory-animation');
-        }, 600);
+        }, 600); // 勝利動畫一次性播放
       }, 300);
     }, { once:true });
   });
