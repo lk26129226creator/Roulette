@@ -560,18 +560,8 @@
       const angle = segment.startAngle + segment.angleSize / 2;
       const angleRad = (angle - 90) * (Math.PI / 180);
 
-      let offsetFromEdge;
-      if (segment.angleSize > 60) {
-        offsetFromEdge = 60;
-      } else if (segment.angleSize > 30) {
-        offsetFromEdge = 52;
-      } else if (segment.angleSize > 15) {
-        offsetFromEdge = 46;
-      } else {
-        offsetFromEdge = 42;
-      }
-
-      const distance = radius - offsetFromEdge;
+  const radialInset = Math.max(38, Math.min(54, radius * 0.18 + 30));
+      const distance = radius - radialInset;
       const x = Math.cos(angleRad) * distance;
       const y = Math.sin(angleRad) * distance;
 
